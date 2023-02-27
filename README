@@ -1,0 +1,127 @@
+Andreea Prigoreanu
+321CA
+
+                                     Tema 3
+                        Client Web. Comunicatie cu REST API
+
+Arhiva contine urmatoarele fisiere:
+- buffer.h si buffer.cpp -> luate din scheletul de la laboratorul 10
+- requests.h si request.cpp -> luate din scheletul de la laboratorul 10, la
+        care am adaugat o functie ce trimite delete request
+- client.cpp -> implementarea clientului
+
+Biblioteca de parsare json:
+    Intrucat am decis sa implementez tema in C++, am ales biblioteca
+"nlohmann", sugerata in enuntul temei. Documentatia este foarte bine scrisa si
+functiile sunt usor de utilizat. Am utilizat contructorii de tip 
+{{"key", value}, ...} pentru a crea obiecte json si functia dump() pentru a
+transforma un obiect json in string.
+    Am instalat biblioteca introducand comanda 
+"sudo apt-get install nlohmann-json-dev" in terminal.
+
+Detalii despre implementare:
+    Am folosit functiile din laborator, pe care le-am modificat astfel incat sa
+adauge header pentru requesturile din cadrul comenzilor get_book, get_books,
+add_book si delete_book.
+    Pentru a verifica daca exista o sesiune curenta am folosit variabila de tip
+bool logged_in, care devine true cand se efectueaza login cu succes. Cookie-ul
+corespunzator sesiunii este pastrat intr-un string.
+    Pentru a verifica daca userul are access la biblioteca am folosit variabila
+de tip bool access_library, care devine true cand serverul accepta conectarea
+la biblioteca. Token-ul JWT pentru accesul la biblioteca este retinut intr-un
+string.
+
+Implementarea comenzilor:
+1. register
+    - daca clientul este logged in nu poate realiza cererea de register
+    - dupa ce se citesc username si password de la stdin, se creeaza un json cu
+valorile acestora
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_post_request
+    - se trimite un request de tip POST catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Username taken", altfel se afiseaza
+mesajul "Registered successfully" si raspunsul serverului
+
+2. login
+    - daca clientul este logged in nu poate realiza cererea de login
+    - dupa ce se citesc username si password de la stdin, se creeaza un json cu
+valorile acestora
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_post_request
+    - se trimite un request de tip POST catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Invalid credentials", altfel se afiseaza
+mesajul "Logged in" si raspunsul serverului
+    - se extrage cookie-ul sesiunii curente din raspunsul serverului
+
+3. enter_library
+    - clientului i se semnaleaza ca trebuie sa se efectueze login inainte daca
+nu exista o sesiune curenta
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_get_request
+    - se trimite un request de tip GET catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Error", altfel se afiseaza
+mesajul "Access granted" si raspunsul serverului
+    - se extrage tokenul JWT din raspunsul serverului
+
+4. get_books
+    - clientului i se semnaleaza ca trebuie sa se efectueze login inainte daca
+nu exista o sesiune curenta
+    - clientului i se semnaleaza ca nu are acces la biblioteca daca este cazul
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_get_request
+    - se trimite un request de tip GET catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Error", altfel se afiseaza raspunsul
+serverului
+
+5. get_book
+    - clientului i se semnaleaza ca trebuie sa se efectueze login inainte daca
+nu exista o sesiune curenta
+    - clientului i se semnaleaza ca nu are acces la biblioteca daca este cazul
+    - se citeste id-ul de la stdin
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_get_request
+    - se trimite un request de tip GET catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Error", altfel se afiseaza raspunsul
+serverului, ce contine si un json cu toate cartile
+
+6. add_book
+    - clientului i se semnaleaza ca trebuie sa se efectueze login inainte daca
+nu exista o sesiune curenta
+    - clientului i se semnaleaza ca nu are acces la biblioteca daca este cazul
+    - se citesc datele despre carte de la stdin si se creeaza un json cu
+acestea
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_get_request
+    - se trimite un request de tip GET catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Invalid book id", altfel se afiseaza
+raspunsul serverului, care contine si un json cu detaliile despre cartea ceruta
+
+7. delete_book
+    - clientului i se semnaleaza ca trebuie sa se efectueze login inainte daca
+nu exista o sesiune curenta
+    - clientului i se semnaleaza ca nu are acces la biblioteca daca este cazul
+    - se citeste id-ul de la stdin
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_get_request
+    - se trimite un request de tip DELETE catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Invalid book id", altfel se afiseaza
+raspunsul serverului
+
+8. Logout
+    - clientului i se semnaleaza ca trebuie sa se efectueze login inainte daca
+nu exista o sesiune curenta
+    - se creeaza mesajul catre server utilizand functia din laborator:
+compute_get_request
+    - se trimite un request de tip DELETE catre server
+    - se verifica raspunsul dat de server la request: daca serverul returneaza
+error in raspuns, se va afisa mesajul "Error", altfel se afiseaza mesajul
+"Logged out"
+    - se reseteaza variabilele logged_in si access_library si stringurile care
+retin cookie-ul sesiunii curente si tockenul de acces la biblioteca
